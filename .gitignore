@@ -1,0 +1,9 @@
+node_modules/
+.env
+.env.*
+.firebase/
+*.log
+hotel.db
+**/local-service-account.json
+**/firebase-service-account*.json
+**/.secrets/

@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hotel del Luna - Contact</title>
+    <link rel="stylesheet" href="hdlstyle.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="index.html" class="nav-logo">Hotel del Luna</a>
+            <button class="nav-toggle" id="nav-toggle" aria-label="Toggle menu">☰</button>
+            <ul class="nav-menu" id="nav-menu">
+                <li><a href="index.html" class="nav-link">Home</a></li>
+                <li><a href="rooms.html" class="nav-link">Rooms</a></li>
+                <li><a href="reservations.html" class="nav-link">Reservations</a></li>
+                <li><a href="about.html" class="nav-link">About</a></li>
+                <li><a href="contact.html" class="nav-link active">Contact</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <header class="page-hero">
+        <span class="eyebrow">Get In Touch</span>
+        <h1>Contact Us</h1>
+        <p>Whatever your business, unfinished or otherwise, we will answer.</p>
+    </header>
+
+    <main class="container">
+        <section class="contact-layout">
+            <div>
+                <div class="contact-info-item">
+                    <span class="eyebrow">Address</span>
+                    <p>Between the realms<br>Where moonlight meets shadow<br>Seoul, South Korea</p>
+                </div>
+                <div class="contact-info-item">
+                    <span class="eyebrow">Front Desk</span>
+                    <p>Open every hour — the moon does not keep a schedule.</p>
+                </div>
+                <div class="contact-info-item">
+                    <span class="eyebrow">Email</span>
+                    <p>concierge@hoteldelluna.com</p>
+                </div>
+                <div class="contact-info-item">
+                    <span class="eyebrow">Response Time</span>
+                    <p>We reply within 24 hours — occasionally sooner, if the matter is urgent.</p>
+                </div>
+            </div>
+
+            <div class="form-panel">
+                <form id="contact-form" novalidate>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="contact-name">Full Name</label>
+                            <input type="text" id="contact-name" name="contact-name" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="contact-email">Email Address</label>
+                            <input type="email" id="contact-email" name="contact-email" required>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="contact-subject">Subject</label>
+                        <select id="contact-subject" name="contact-subject" required>
+                            <option value="">Select a subject</option>
+                            <option value="reservation">Reservation Inquiry</option>
+                            <option value="modification">Modify Existing Booking</option>
+                            <option value="services">About Our Services</option>
+                            <option value="special">Special Requests</option>
+                            <option value="feedback">Feedback</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="contact-message">Message</label>
+                        <textarea id="contact-message" name="contact-message" maxlength="1000" required></textarea>
+                    </div>
+
+                    <p class="form-message" id="contact-form-message"></p>
+                    <button type="submit" class="btn-submit" id="contact-submit-btn">Send Message</button>
+                </form>
+            </div>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <div class="footer-container">
+            <div class="footer-section">
+                <h4>Hotel del Luna</h4>
+                <p>Est. 1398 — serving guests for over 600 years</p>
+            </div>
+            <div class="footer-section">
+                <h4>Quick Links</h4>
+                <ul>
+                    <li><a href="rooms.html">Our Rooms</a></li>
+                    <li><a href="reservations.html">Book Now</a></li>
+                    <li><a href="about.html">Our Story</a></li>
+                    <li><a href="contact.html">Get in Touch</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h4>Location</h4>
+                <p>Between the realms<br>Where moonlight meets shadow<br>Seoul, South Korea</p>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2026 Hotel del Luna. All rights reserved across all dimensions.</p>
+        </div>
+    </footer>
+
+    <div class="modal-container hidden" id="contact-modal">
+        <div class="modal-box">
+            <h3 id="contact-modal-title"></h3>
+            <p id="contact-modal-text"></p>
+            <button class="modal-close" id="contact-modal-close">Close</button>
+        </div>
+    </div>
+
+    <script src="nav.js"></script>
+    <script src="contact.js"></script>
+</body>
+</html>
