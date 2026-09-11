@@ -47,6 +47,26 @@ app.use(express.urlencoded({ extended: true }));
 
 app.use(express.static(__dirname));
 
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, 'index.html'));
+});
+
+app.get('/rooms', (req, res) => {
+  res.sendFile(path.join(__dirname, 'rooms.html'));
+});
+
+app.get('/reservations', (req, res) => {
+  res.sendFile(path.join(__dirname, 'reservations.html'));
+});
+
+app.get('/about', (req, res) => {
+  res.sendFile(path.join(__dirname, 'about.html'));
+});
+
+app.get('/contact', (req, res) => {
+  res.sendFile(path.join(__dirname, 'contact.html'));
+});
+
 app.get('/api/health', (req, res) => {
   res.json({ ok: true, message: 'Hotel del Luna backend is running.' });
 });
