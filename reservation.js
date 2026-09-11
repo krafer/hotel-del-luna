@@ -35,6 +35,69 @@
     return id;
   }
 
+  function formatDateInput(date) {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  }
+
+  function getBookingWindow() {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const max = new Date(today);
+    max.setFullYear(max.getFullYear() + 1);
+
+    return { today, max };
+  }
+
+  function isReasonableReservationDate(dateValue) {
+    if (typeof dateValue !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(dateValue)) {
+      return false;
+    }
+
+    const parsed = new Date(dateValue + 'T00:00:00');
+    if (Number.isNaN(parsed.getTime())) {
+      return false;
+    }
+
+    const { today, max } = getBookingWindow();
+    const year = parsed.getFullYear();
+
+    if (year < today.getFullYear() || year > max.getFullYear()) {
+      return false;
+    }
+
+    return parsed >= today && parsed <= max;
+  }
+
+  function bindDateConstraints() {
+    const checkInField = document.getElementById('check-in');
+    const checkOutField = document.getElementById('check-out');
+    if (!checkInField || !checkOutField) return;
+
+    const { today, max } = getBookingWindow();
+    checkInField.min = formatDateInput(today);
+    checkInField.max = formatDateInput(max);
+    checkOutField.min = formatDateInput(today);
+    checkOutField.max = formatDateInput(max);
+
+    if (checkInField.value && !isReasonableReservationDate(checkInField.value)) {
+      checkInField.value = formatDateInput(today);
+    }
+
+    if (checkInField.value) {
+      const minCheckout = new Date(checkInField.value + 'T00:00:00');
+      minCheckout.setDate(minCheckout.getDate() + 1);
+      checkOutField.min = formatDateInput(minCheckout);
+    }
+
+    if (checkOutField.value && checkOutField.value <= checkInField.value) {
+      checkOutField.value = '';
+    }
+  }
+
   async function getReservations() {
     try {
       const response = await fetch(`/api/reservations?guestId=${encodeURIComponent(getGuestId())}`);
@@ -146,11 +209,7 @@
         : 'Local storage is unavailable in this browser, so reservations will not be saved after you close this tab.';
     }
 
-    const checkInField = document.getElementById('check-in');
-    if (checkInField) {
-      checkInField.min = new Date().toISOString().split('T')[0];
-    }
-
+    bindDateConstraints();
     renderReservations();
 
     if (form) {
@@ -166,6 +225,11 @@
 
         if (!name || !email || !checkInDate || !checkOutDate) {
           showMessage('Please fill in your name, email, check-in date, and check-out date.', true);
+          return;
+        }
+
+        if (!isReasonableReservationDate(checkInDate) || !isReasonableReservationDate(checkOutDate)) {
+          showMessage('Please choose a check-in and check-out date within the next year.', true);
           return;
         }
 
@@ -200,14 +264,31 @@
             body: JSON.stringify(reservation)
           });
 
+          let serverMessage = 'Reservation save failed';
           if (!response.ok) {
-            throw new Error('Reservation save failed');
+            try {
+              const payload = await response.json();
+              if (payload && payload.error) {
+                serverMessage = payload.error;
+              }
+            } catch (error) {
+              try {
+                const text = await response.text();
+                if (text) {
+                  serverMessage = text;
+                }
+              } catch (textError) {
+                serverMessage = 'Reservation save failed';
+              }
+            }
+            throw new Error(serverMessage);
           }
 
           await renderReservations();
           showMessage('Reservation confirmed, see you then.', false);
           form.reset();
           document.getElementById('guests').value = '2';
+          bindDateConstraints();
 
           submitBtn.disabled = false;
           submitBtn.textContent = 'Confirm Reservation';
@@ -217,7 +298,7 @@
             'Thanks, ' + name + '. We have saved your stay from ' + formatDate(checkInDate) + ' to ' + formatDate(checkOutDate) + '.'
           );
         } catch (error) {
-          showMessage('We were unable to save your reservation right now. Please try again.', true);
+          showMessage(error && error.message ? error.message : 'We were unable to save your reservation right now. Please try again.', true);
           submitBtn.disabled = false;
           submitBtn.textContent = 'Confirm Reservation';
         }

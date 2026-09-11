@@ -9,6 +9,35 @@ function isDateOnly(value) {
   return typeof value === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(value) && !Number.isNaN(Date.parse(`${value}T00:00:00Z`));
 }
 
+function getReservationDateRange() {
+  const today = new Date();
+  today.setUTCHours(0, 0, 0, 0);
+
+  const maxDate = new Date(today);
+  maxDate.setUTCFullYear(maxDate.getUTCFullYear() + 1);
+
+  return { today, maxDate };
+}
+
+function isReasonableReservationDate(value) {
+  if (!isDateOnly(value)) {
+    return false;
+  }
+
+  const parsed = new Date(`${value}T00:00:00Z`);
+  if (Number.isNaN(parsed.getTime())) {
+    return false;
+  }
+
+  const { today, maxDate } = getReservationDateRange();
+  const year = Number(value.slice(0, 4));
+  if (year < today.getUTCFullYear() || year > maxDate.getUTCFullYear()) {
+    return false;
+  }
+
+  return parsed >= today && parsed <= maxDate;
+}
+
 function isEmail(value) {
   return typeof value === 'string' && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
 }
@@ -41,8 +70,13 @@ app.post('/api/reservations', async (req, res) => {
       return res.status(400).json({ error: 'Missing required reservation fields.' });
     }
 
-    if (!isEmail(payload.email) || !isDateOnly(payload.checkInDate) || !isDateOnly(payload.checkOutDate) || payload.checkOutDate <= payload.checkInDate) {
-      return res.status(400).json({ error: 'Reservation email and dates are invalid.' });
+    const checkInDate = String(payload.checkInDate);
+    const checkOutDate = String(payload.checkOutDate);
+    const checkInParsed = new Date(`${checkInDate}T00:00:00Z`);
+    const checkOutParsed = new Date(`${checkOutDate}T00:00:00Z`);
+
+    if (!isEmail(payload.email) || !isReasonableReservationDate(checkInDate) || !isReasonableReservationDate(checkOutDate) || checkOutParsed <= checkInParsed) {
+      return res.status(400).json({ error: 'Reservation dates must be today or later, with checkout after check-in, and within one year of today.' });
     }
 
     const guests = Number(payload.guests);
