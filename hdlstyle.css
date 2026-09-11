@@ -381,16 +381,25 @@ section + section { margin-top: 1rem; }
 }
 
 .standard-room, .room-echoing {
-    background: linear-gradient(135deg, #2a2650, #191534 60%),
-        radial-gradient(circle at 70% 30%, rgba(201,162,75,0.18), transparent 55%);
+    background-image: linear-gradient(135deg, rgba(42, 38, 80, 0.45), rgba(25, 21, 52, 0.55)),
+        url('The_Echoing_Hall.jpg');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
 }
 .deluxe-room, .room-moonview {
-    background: linear-gradient(135deg, #241f4a, #14112c 60%),
-        radial-gradient(circle at 30% 25%, rgba(201,162,75,0.28), transparent 55%);
+    background-image: linear-gradient(135deg, rgba(36, 31, 74, 0.45), rgba(20, 17, 44, 0.6)),
+        url('The_Moonview_Chamber.jpg');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
 }
 .suite-room, .room-celestial {
-    background: linear-gradient(135deg, #2d1f3d, #150f28 60%),
-        radial-gradient(circle at 50% 20%, rgba(154,68,68,0.35), transparent 55%);
+    background-image: linear-gradient(135deg, rgba(45, 31, 61, 0.35), rgba(21, 15, 40, 0.55)),
+        url('Celestial_Suite.jpg');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
 }
 
 .room-preview-content, .room-card-body {
