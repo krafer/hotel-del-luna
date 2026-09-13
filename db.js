@@ -15,32 +15,26 @@ function normalizePrivateKey(value) {
 
 function readLocalServiceAccount() {
   const configuredPath = process.env.FIREBASE_SERVICE_ACCOUNT_PATH;
-  const candidatePaths = [configuredPath].filter(Boolean);
-
-  for (const candidate of candidatePaths) {
-    if (!candidate || !fs.existsSync(candidate)) continue;
-
-    const entries = fs.statSync(candidate).isDirectory()
-      ? fs.readdirSync(candidate).filter((file) => file.toLowerCase().endsWith('.json')).map((file) => path.join(candidate, file))
-      : [candidate];
-
-    for (const file of entries) {
-      try {
-        const raw = fs.readFileSync(file, 'utf8');
-        const parsed = JSON.parse(raw);
-        const hasRequiredFields = parsed && parsed.project_id && parsed.client_email && parsed.private_key;
-        if (!hasRequiredFields) {
-          console.warn('Local Firebase service account exists but is missing required fields.');
-          return null;
-        }
-        return parsed;
-      } catch (error) {
-        continue;
-      }
-    }
+  if (!configuredPath) {
+    console.warn('[Firebase diagnostic] Service-account path is missing.');
+    return null;
   }
 
-  return null;
+  try {
+    const raw = fs.readFileSync(configuredPath, 'utf8');
+    const parsed = JSON.parse(raw);
+    console.log('[Firebase diagnostic] JSON parsing succeeded.', {
+      path: configuredPath,
+      keys: Object.keys(parsed)
+    });
+    return parsed;
+  } catch (error) {
+    console.error('[Firebase diagnostic] JSON parsing failed.', {
+      path: configuredPath,
+      message: error.message
+    });
+    return null;
+  }
 }
 
 function initializeFirebase() {
