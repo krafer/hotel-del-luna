@@ -29,7 +29,7 @@
 
     <main class="container">
         <section class="rooms-grid">
-            <article class="room-card">
+            <article class="room-card" data-room-name="The Echoing Hall" data-room-type="Standard Room" data-room-description="A cozy haven where whispers of the past echo softly through the night. Ideal for guests seeking quiet reflection." data-room-price="₩180,000" data-room-images="The_Echoing_Hall.png|The_Echoing_Hall_2.png|Queen_bed.png">
                 <div class="room-card-image room-echoing"></div>
                 <div class="room-card-body">
                     <h3>The Echoing Hall</h3>
@@ -37,15 +37,14 @@
                     <p>A cozy haven where whispers of the past echo softly through the night. Ideal for guests seeking quiet reflection.</p>
                     <p class="room-price">₩180,000 <span>/ night</span></p>
                     <ul class="room-amenities">
-                        <li>Queen Bed</li>
-                        <li>Moon Garden View</li>
-                        <li>Incense Service</li>
+                        <li><button class="room-feature" type="button" data-image="Queen_bed.png">Queen Bed</button></li>
+                        <li><button class="room-feature" type="button" data-image="The_Echoing_Hall_2.png">Moon Garden View</button></li>
                     </ul>
                     <a href="/reservations" class="btn-secondary">Reserve This Room</a>
                 </div>
             </article>
 
-            <article class="room-card">
+            <article class="room-card" data-room-name="The Moonview Chamber" data-room-type="Deluxe Room" data-room-description="Luxurious quarters with panoramic views of the celestial moon garden and a private hanok-style balcony." data-room-price="₩320,000" data-room-images="The_Moonview_Chamber.jpg|The_Moonview_Chamber_2.jpg|King_bed.png|Private_balcony.png">
                 <div class="room-card-image room-moonview"></div>
                 <div class="room-card-body">
                     <h3>The Moonview Chamber</h3>
@@ -53,8 +52,9 @@
                     <p>Luxurious quarters with panoramic views of the celestial moon garden and a private hanok-style balcony.</p>
                     <p class="room-price">₩320,000 <span>/ night</span></p>
                     <ul class="room-amenities">
-                        <li>King Bed</li>
-                        <li>Private Balcony</li>
+                        <li><button class="room-feature" type="button" data-image="King_bed.png">King Bed</button></li>
+                        <li><button class="room-feature" type="button" data-image="Private_balcony.png">Private Balcony</button></li>
+                        <li><button class="room-feature" type="button" data-image="The_Moonview_Chamber_2.jpg">Moon Garden View</button></li>
                         <li>Tea Ceremony</li>
                         <li>Spirit Concierge</li>
                     </ul>
@@ -62,7 +62,7 @@
                 </div>
             </article>
 
-            <article class="room-card">
+            <article class="room-card" data-room-name="Celestial Suite" data-room-type="Manager's Quarters" data-room-description="The pinnacle of otherworldly luxury, reserved for the most distinguished guests and their unfinished business." data-room-price="₩650,000" data-room-images="Grand_Suite.png|Lacquer_bath.png|Roof_top.png|King_bed.png">
                 <div class="room-card-image room-celestial"></div>
                 <div class="room-card-body">
                     <h3>Celestial Suite</h3>
@@ -71,9 +71,9 @@
                     <p class="room-price">₩650,000 <span>/ night</span></p>
                     <ul class="room-amenities">
                         <li>Grand Suite</li>
-                        <li>Rooftop Access</li>
+                        <li><button class="room-feature" type="button" data-image="Roof_top.png">Rooftop Access</button></li>
                         <li>Personal Attendant</li>
-                        <li>Lacquer Bath</li>
+                        <li><button class="room-feature" type="button" data-image="Lacquer_bath.png">Lacquer Bath</button></li>
                     </ul>
                     <a href="/reservations" class="btn-secondary">Reserve This Room</a>
                 </div>
@@ -113,5 +113,6 @@
     </footer>
 
     <script src="nav.js"></script>
+    <script src="rooms.js"></script>
 </body>
 </html>
