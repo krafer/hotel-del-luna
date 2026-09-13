@@ -98,6 +98,17 @@
     }
   }
 
+  function selectRoomFromUrl() {
+    const roomSelect = document.getElementById('room-type');
+    const requestedRoom = new URLSearchParams(window.location.search).get('room');
+    if (!roomSelect || !requestedRoom) return;
+
+    const matchingOption = Array.from(roomSelect.options).find((option) => option.value === requestedRoom);
+    if (matchingOption) {
+      roomSelect.value = matchingOption.value;
+    }
+  }
+
   async function getReservations() {
     try {
       const response = await fetch(`/api/reservations?guestId=${encodeURIComponent(getGuestId())}`);
@@ -210,6 +221,7 @@
     }
 
     bindDateConstraints();
+    selectRoomFromUrl();
     renderReservations();
 
     if (form) {
