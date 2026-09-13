@@ -396,7 +396,7 @@ section + section { margin-top: 1rem; }
 }
 .suite-room, .room-celestial {
     background-image: linear-gradient(135deg, rgba(45, 31, 61, 0.35), rgba(21, 15, 40, 0.55)),
-        url('Grand_Suite.png');
+        url('Celestial_Suite.png');
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
