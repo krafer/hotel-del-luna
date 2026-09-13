@@ -1,4 +1,5 @@
 const express = require('express');
+const fs = require('fs');
 const path = require('path');
 const { initDb, getReservationsByGuestId, getAllReservations, saveReservation, deleteReservation, saveContactMessage, getContactMessages } = require('./db');
 
@@ -40,6 +41,28 @@ function isReasonableReservationDate(value) {
 
 function isEmail(value) {
   return typeof value === 'string' && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
+}
+
+function logFirebaseServiceAccountDiagnostic() {
+  const configuredPath = process.env.FIREBASE_SERVICE_ACCOUNT_PATH || '';
+  const fileExists = configuredPath ? fs.existsSync(configuredPath) : false;
+  let fileReadable = false;
+
+  if (fileExists) {
+    try {
+      fs.accessSync(configuredPath, fs.constants.R_OK);
+      fileReadable = true;
+    } catch (error) {
+      fileReadable = false;
+    }
+  }
+
+  console.log('[Firebase diagnostic]', {
+    pathConfigured: Boolean(process.env.FIREBASE_SERVICE_ACCOUNT_PATH),
+    path: configuredPath,
+    fileExists,
+    fileReadable
+  });
 }
 
 app.use(express.json());
@@ -184,6 +207,7 @@ app.use((req, res) => {
 
 async function startServer() {
   try {
+    logFirebaseServiceAccountDiagnostic();
     await initDb();
     app.listen(PORT, () => {
       console.log(`Hotel del Luna server running at http://localhost:${PORT}`);
