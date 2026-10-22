@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Sign In | Hotel del Luna</title>
+    <link rel="stylesheet" href="/hdlstyle.css">
+</head>
+<body data-admin-page="login">
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="/" class="nav-logo">Hotel del Luna</a>
+            <a href="/" class="nav-link">Return to site</a>
+        </div>
+    </nav>
+
+    <main class="container admin-auth-container">
+        <section class="admin-panel admin-auth-panel" aria-labelledby="admin-title">
+            <span class="eyebrow">Staff access</span>
+            <h1 id="admin-title" class="section-title">Administrator sign in</h1>
+            <p class="section-lede">Sign in with your authorized Firebase account. Administrator access is verified by the server.</p>
+            <form id="admin-login-form" class="admin-form">
+                <label for="admin-email">Email address</label>
+                <input id="admin-email" name="email" type="email" autocomplete="username" required>
+                <label for="admin-password">Password</label>
+                <input id="admin-password" name="password" type="password" autocomplete="current-password" required>
+                <button id="admin-login-button" class="btn-primary-large" type="submit">Sign in</button>
+            </form>
+            <p id="admin-status" class="admin-status" role="status" aria-live="polite"></p>
+        </section>
+    </main>
+
+    <script type="module" src="/admin.mjs"></script>
+</body>
+</html>

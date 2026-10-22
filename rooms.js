@@ -34,6 +34,39 @@
   let activeImageIndex = 0;
   let lastFocusedElement = null;
 
+  async function loadRoomInformation() {
+    try {
+      const response = await fetch('/api/rooms', { cache: 'no-store' });
+      if (!response.ok) {
+        throw new Error('Room information request failed.');
+      }
+      const rooms = await response.json();
+      if (!Array.isArray(rooms)) {
+        throw new Error('Room information response was invalid.');
+      }
+
+      rooms.forEach((room) => {
+        if (typeof room.key !== 'string' || typeof room.description !== 'string' ||
+            !Number.isInteger(room.priceKrw)) {
+          return;
+        }
+        const card = roomCards.find((item) => item.dataset.roomKey === room.key);
+        if (!card) return;
+        const description = card.querySelector('.room-description');
+        const price = card.querySelector('.room-price-amount');
+        if (!description || !price) return;
+
+        const formattedPrice = `₩${new Intl.NumberFormat('ko-KR').format(room.priceKrw)}`;
+        card.dataset.roomDescription = room.description;
+        card.dataset.roomPrice = formattedPrice;
+        description.textContent = room.description;
+        price.textContent = formattedPrice;
+      });
+    } catch (error) {
+      console.error('Room display information could not be refreshed.', error);
+    }
+  }
+
   function updateModalImage() {
     const image = activeImages[activeImageIndex];
     modalImage.src = image;
@@ -111,4 +144,5 @@
       showAdjacentImage(1);
     }
   });
+  loadRoomInformation();
 })();

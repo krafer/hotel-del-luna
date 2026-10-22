@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard | Hotel del Luna</title>
+    <link rel="stylesheet" href="/hdlstyle.css">
+</head>
+<body data-admin-page="dashboard">
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="/" class="nav-logo">Hotel del Luna</a>
+            <button id="admin-sign-out" class="admin-sign-out" type="button">Sign out</button>
+        </div>
+    </nav>
+
+    <header class="page-hero">
+        <span class="eyebrow">Hotel operations</span>
+        <h1>Admin dashboard</h1>
+        <p id="admin-account" aria-live="polite">Verifying administrator access…</p>
+    </header>
+
+    <main class="container admin-dashboard">
+        <p id="admin-status" class="admin-status" role="status" aria-live="polite"></p>
+        <section class="admin-panel" aria-labelledby="reservations-title">
+            <h2 id="reservations-title" class="section-title">Reservations</h2>
+            <div class="admin-filters">
+                <label for="reservation-search">Search guest or email</label>
+                <input id="reservation-search" type="search" autocomplete="off">
+                <label for="reservation-room-filter">Room category</label>
+                <select id="reservation-room-filter">
+                    <option value="">All room categories</option>
+                    <option value="Echoing Hall">Echoing Hall</option>
+                    <option value="Moonview Chamber">Moonview Chamber</option>
+                    <option value="Celestial Suite">Celestial Suite</option>
+                </select>
+                <label for="reservation-date-filter">Check-in date</label>
+                <input id="reservation-date-filter" type="date">
+            </div>
+            <div class="admin-table-wrap">
+                <table class="admin-table">
+                    <thead>
+                        <tr><th>Guest</th><th>Room</th><th>Check-in</th><th>Check-out</th><th>Guests</th><th>Created</th><th>Details</th></tr>
+                    </thead>
+                    <tbody id="admin-reservations">
+                        <tr><td colspan="7">Loading reservations…</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+        <section id="reservation-details" class="admin-panel admin-details" aria-labelledby="reservation-details-title" hidden>
+            <div class="admin-details-heading">
+                <h2 id="reservation-details-title" class="section-title" tabindex="-1">Reservation details</h2>
+                <button id="close-reservation-details" class="admin-secondary-button" type="button">Close</button>
+            </div>
+            <dl class="admin-detail-list">
+                <div><dt>Guest</dt><dd id="detail-name"></dd></div>
+                <div><dt>Email</dt><dd id="detail-email"></dd></div>
+                <div><dt>Room category</dt><dd id="detail-room"></dd></div>
+                <div><dt>Check-in</dt><dd id="detail-check-in"></dd></div>
+                <div><dt>Check-out</dt><dd id="detail-check-out"></dd></div>
+                <div><dt>Guest count</dt><dd id="detail-guests"></dd></div>
+                <div><dt>Created</dt><dd id="detail-created"></dd></div>
+                <div><dt>Status</dt><dd id="detail-status"></dd></div>
+            </dl>
+            <button id="edit-reservation" class="admin-secondary-button" type="button">Edit guest details</button>
+            <form id="edit-reservation-form" class="admin-form admin-edit-form" hidden>
+                <label for="edit-reservation-name">Guest name</label>
+                <input id="edit-reservation-name" name="name" type="text" maxlength="100" required>
+                <label for="edit-reservation-email">Email</label>
+                <input id="edit-reservation-email" name="email" type="email" maxlength="254" required>
+                <label for="edit-reservation-guests">Guest count</label>
+                <input id="edit-reservation-guests" name="guests" type="number" min="1" max="4" step="1" required>
+                <div class="admin-edit-actions">
+                    <button class="admin-secondary-button" type="submit">Save changes</button>
+                    <button id="cancel-reservation-edit" class="admin-secondary-button" type="button">Cancel edit</button>
+                </div>
+            </form>
+            <button id="delete-reservation" class="admin-danger-button" type="button">Cancel reservation</button>
+        </section>
+        <section class="admin-panel" aria-labelledby="contact-messages-title">
+            <h2 id="contact-messages-title" class="section-title">Contact messages</h2>
+            <div class="admin-filters contact-message-filters">
+                <label for="contact-message-search">Search sender, email, or message</label>
+                <input id="contact-message-search" type="search" autocomplete="off">
+            </div>
+            <p id="contact-message-status" class="admin-status" role="status" aria-live="polite"></p>
+            <div class="admin-table-wrap">
+                <table class="admin-table">
+                    <thead>
+                        <tr><th>Sender</th><th>Email</th><th>Message</th><th>Submitted</th><th>Actions</th></tr>
+                    </thead>
+                    <tbody id="admin-contact-messages">
+                        <tr><td colspan="5">Loading contact messages…</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+        <section class="admin-panel" aria-labelledby="room-information-title">
+            <h2 id="room-information-title" class="section-title">Room information</h2>
+            <p>Edit the public description and displayed nightly price for an existing room category.</p>
+            <p id="room-information-status" class="admin-status" role="status" aria-live="polite">Loading room information…</p>
+            <form id="room-information-form" class="admin-form">
+                <label for="room-information-category">Room category</label>
+                <select id="room-information-category" name="roomCategory">
+                    <option value="echoing-hall">Echoing Hall</option>
+                    <option value="moonview-chamber">Moonview Chamber</option>
+                    <option value="celestial-suite">Celestial Suite</option>
+                </select>
+                <label for="room-information-description">Public description</label>
+                <textarea id="room-information-description" name="description" maxlength="1000" rows="4" required></textarea>
+                <label for="room-information-price">Displayed price per night (KRW)</label>
+                <input id="room-information-price" name="priceKrw" type="number" min="1" max="10000000" step="1" required>
+                <button id="save-room-information" type="submit" disabled>Save room information</button>
+            </form>
+        </section>
+    </main>
+
+    <script type="module" src="/admin.mjs"></script>
+</body>
+</html>

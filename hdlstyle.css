@@ -1019,6 +1019,241 @@ section + section { margin-top: 1rem; }
     font-size: 0.78rem;
 }
 
+.admin-auth-container {
+    max-width: 620px;
+}
+
+.admin-panel {
+    background: linear-gradient(180deg, rgba(19,26,45,0.94), rgba(16,20,33,0.96));
+    border: 1px solid var(--border-soft);
+    padding: 2rem;
+    margin-bottom: 2rem;
+    box-shadow: 0 18px 38px rgba(0,0,0,0.1);
+}
+
+.admin-auth-panel .section-lede {
+    margin-bottom: 1.8rem;
+}
+
+.admin-form {
+    display: grid;
+    gap: 0.6rem;
+}
+
+.admin-edit-form[hidden] {
+    display: none;
+}
+
+.admin-edit-form {
+    margin-top: 1.4rem;
+}
+
+.admin-edit-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+}
+
+.admin-form label {
+    color: var(--text-muted);
+    font-size: 0.72rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    margin-top: 0.5rem;
+}
+
+.admin-form input,
+.admin-form select,
+.admin-form textarea {
+    width: 100%;
+    background: var(--bg-primary);
+    border: 1px solid var(--border);
+    color: var(--text-primary);
+    font: inherit;
+    padding: 0.8rem 0.9rem;
+}
+
+.admin-form textarea {
+    resize: vertical;
+}
+
+.admin-form input:focus,
+.admin-form select:focus,
+.admin-form textarea:focus {
+    border-color: var(--gold);
+    outline: none;
+}
+
+.admin-form button,
+.admin-sign-out {
+    justify-self: start;
+    background: transparent;
+    border: 1px solid var(--gold);
+    color: var(--gold-bright);
+    cursor: pointer;
+    font: inherit;
+    letter-spacing: 0.08em;
+    margin-top: 1rem;
+    padding: 0.75rem 1.3rem;
+    text-transform: uppercase;
+}
+
+.admin-form button:hover,
+.admin-sign-out:hover {
+    background: var(--gold);
+    color: var(--bg-primary);
+}
+
+.admin-form button:disabled,
+.admin-sign-out:disabled {
+    cursor: wait;
+    opacity: 0.65;
+}
+
+.admin-status {
+    color: var(--text-muted);
+    min-height: 1.5rem;
+    margin-top: 1rem;
+}
+
+.admin-status.is-error {
+    color: var(--lacquer-bright);
+}
+
+.admin-dashboard {
+    padding-top: 2.5rem;
+}
+
+.admin-dashboard .section-title {
+    font-size: 2rem;
+    margin-bottom: 1.2rem;
+}
+
+.admin-filters {
+    display: grid;
+    grid-template-columns: auto minmax(10rem, 1fr) auto minmax(10rem, 1fr) auto minmax(10rem, 1fr);
+    align-items: center;
+    gap: 0.7rem;
+    margin-bottom: 1.2rem;
+}
+
+.contact-message-filters {
+    grid-template-columns: auto minmax(12rem, 1fr);
+    max-width: 42rem;
+}
+
+.admin-filters label {
+    color: var(--text-muted);
+    font-size: 0.76rem;
+}
+
+.admin-filters input,
+.admin-filters select {
+    min-width: 0;
+    background: var(--bg-primary);
+    border: 1px solid var(--border);
+    color: var(--text-primary);
+    font: inherit;
+    padding: 0.55rem 0.65rem;
+}
+
+.admin-filters input:focus,
+.admin-filters select:focus {
+    border-color: var(--gold);
+    outline: none;
+}
+
+.admin-table-wrap {
+    overflow-x: auto;
+}
+
+.admin-table {
+    border-collapse: collapse;
+    min-width: 620px;
+    text-align: left;
+    width: 100%;
+}
+
+.admin-table th,
+.admin-table td {
+    border-bottom: 1px solid var(--border-soft);
+    padding: 0.8rem;
+    vertical-align: top;
+}
+
+.admin-table th {
+    color: var(--gold-bright);
+    font-size: 0.72rem;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+}
+
+.admin-table td {
+    color: var(--text-muted);
+    overflow-wrap: anywhere;
+}
+
+.admin-secondary-button,
+.admin-danger-button {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+    cursor: pointer;
+    font: inherit;
+    padding: 0.45rem 0.75rem;
+}
+
+.admin-secondary-button:hover {
+    border-color: var(--gold);
+    color: var(--gold-bright);
+}
+
+.admin-danger-button {
+    border-color: var(--lacquer);
+    color: var(--lacquer-bright);
+    margin-top: 1.5rem;
+}
+
+.admin-danger-button:hover {
+    background: var(--lacquer);
+    color: var(--text-primary);
+}
+
+.admin-danger-button:disabled {
+    cursor: wait;
+    opacity: 0.65;
+}
+
+.admin-details[hidden] {
+    display: none;
+}
+
+.admin-details-heading {
+    display: flex;
+    align-items: start;
+    justify-content: space-between;
+    gap: 1rem;
+}
+
+.admin-detail-list {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1rem;
+}
+
+.admin-detail-list dt {
+    color: var(--gold-bright);
+    font-size: 0.72rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+}
+
+.admin-detail-list dd {
+    color: var(--text-muted);
+    overflow-wrap: anywhere;
+}
+
 @media (max-width: 860px) {
     .welcome-grid, .rooms-preview, .rooms-grid { grid-template-columns: 1fr; }
     .form-row, .about-grid, .contact-layout { grid-template-columns: 1fr; }
@@ -1043,6 +1278,10 @@ section + section { margin-top: 1rem; }
 }
 
 @media (max-width: 620px) {
+    .admin-panel { padding: 1.4rem; }
+    .admin-auth-container { padding-left: 1rem; padding-right: 1rem; }
+    .admin-filters { grid-template-columns: 1fr; }
+    .admin-detail-list { grid-template-columns: 1fr; }
     .hotel-gallery-grid { grid-template-columns: 1fr; }
     .hotel-gallery-item:nth-child(n) { grid-column: span 1; }
     .room-modal { padding: 0.75rem; }
