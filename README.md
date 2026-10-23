@@ -64,13 +64,13 @@ Never copy the service-account JSON into this repository or commit it to GitHub.
 - `message`: string
 - `createdAt`: server-generated Firestore Timestamp
 
-There is no `users` collection. Room display details can be stored in `room_information`; document IDs are the fixed slugs `echoing-hall`, `moonview-chamber`, and `celestial-suite`, with only `description` (string) and `priceKrw` (integer) fields. The current defaults are:
+There is no `users` collection. Room display details can be stored in `room_information`; document IDs are the fixed slugs `echoing-hall`, `moonview-chamber`, and `celestial-suite`, with only `description` (string) and `priceKrw` (integer) fields. `priceKrw` is the existing API field name; its values are displayed as Philippine pesos. The current defaults are:
 
 | Document ID | Room category | Description | Price per night |
 | --- | --- | --- | ---: |
-| `echoing-hall` | Echoing Hall | A cozy haven where whispers of the past echo softly through the night. Ideal for guests seeking quiet reflection. | 180000 KRW |
-| `moonview-chamber` | Moonview Chamber | Luxurious quarters with panoramic views of the celestial moon garden and a private hanok-style balcony. | 320000 KRW |
-| `celestial-suite` | Celestial Suite | The pinnacle of otherworldly luxury, reserved for the most distinguished guests and their unfinished business. With personal attendant | 650000 KRW |
+| `echoing-hall` | Echoing Hall | A cozy haven where whispers of the past echo softly through the night. Ideal for guests seeking quiet reflection. | 8636 PHP |
+| `moonview-chamber` | Moonview Chamber | Luxurious quarters with panoramic views of the celestial moon garden and a private hanok-style balcony. | 15352 PHP |
+| `celestial-suite` | Celestial Suite | The pinnacle of otherworldly luxury, reserved for the most distinguished guests and their unfinished business. With personal attendant | 31184 PHP |
 
 Documents are created or replaced only when an administrator saves a room. Missing documents use these defaults; no collection prepopulation or migration is required. Room categories, room types, amenities, and image references remain fixed in `rooms.html`.
 
@@ -109,7 +109,7 @@ The administrator sign-in page is `/admin/login`; the dashboard is `/admin`. The
 
 The dashboard displays reservations with guest, room, stay dates, guest count, and creation time. Search, room-category, and exact check-in-date filters are applied locally to the loaded list. Administrators can edit only a reservation's guest name, email, and guest count through the admin-only `PATCH /api/reservations/:id` endpoint. Reservation identity, ownership, stay dates, room category, availability claims, and idempotency records are not editable through this endpoint. Administrators can also request cancellation through the existing authenticated `DELETE /api/reservations/:id` endpoint after confirming the action.
 
-The admin dashboard also displays contact sender name, email, message, and submission date. Its search filters the already-loaded messages by sender name, email, or message text; contact listing and deletion require a verified administrator claim. Administrators can edit only the description and displayed integer KRW price for the three fixed categories through `PATCH /api/rooms/:key`; category identities, images, and booking behavior are not editable.
+The admin dashboard also displays contact sender name, email, message, and submission date. Its search filters the already-loaded messages by sender name, email, or message text; contact listing and deletion require a verified administrator claim. Administrators can edit only the description and displayed integer PHP price for the three fixed categories through `PATCH /api/rooms/:key`; category identities, images, and booking behavior are not editable.
 
 Set these public Firebase Web App configuration values in the server environment: `FIREBASE_WEB_API_KEY`, `FIREBASE_WEB_AUTH_DOMAIN`, `FIREBASE_WEB_PROJECT_ID`, and `FIREBASE_WEB_APP_ID`. `GET /api/firebase-config` returns only these fields and responds with 503 when they are missing. Firebase Web configuration is public client configuration, not a service-account credential; restrict the API key in Google Cloud as appropriate. The Firebase JS SDK is loaded from Google's CDN.
 

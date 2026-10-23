@@ -28,7 +28,12 @@ class FakeFirestore {
         _type: 'document',
         _collection: name,
         _id: id,
-        get: async () => this.snapshot(name, id)
+        get: async () => this.snapshot(name, id),
+        update: async (changes) => {
+          const records = this.collections.get(name);
+          if (!records.has(id)) throw new Error('document does not exist');
+          records.set(id, { ...records.get(id), ...changes });
+        }
       })
     };
   }
@@ -500,9 +505,9 @@ describe('API security boundaries', () => {
     assert.equal(response.status, 200);
     assert.equal(response.headers.get('cache-control'), 'no-store');
     assert.deepEqual(rooms.map(({ key, roomName, priceKrw }) => ({ key, roomName, priceKrw })), [
-      { key: 'echoing-hall', roomName: 'Echoing Hall', priceKrw: 180000 },
-      { key: 'moonview-chamber', roomName: 'Moonview Chamber', priceKrw: 320000 },
-      { key: 'celestial-suite', roomName: 'Celestial Suite', priceKrw: 650000 }
+      { key: 'echoing-hall', roomName: 'Echoing Hall', priceKrw: 8636 },
+      { key: 'moonview-chamber', roomName: 'Moonview Chamber', priceKrw: 15352 },
+      { key: 'celestial-suite', roomName: 'Celestial Suite', priceKrw: 31184 }
     ]);
   });
 
@@ -938,6 +943,63 @@ describe('durable booking requirement', () => {
       createReservationAtomically(bookingPayload(), randomUUID()),
       (error) => error.code === 'BOOKING_STORAGE_UNAVAILABLE'
     );
+  });
+});
+
+describe('public room pricing display', () => {
+  it('shows the requested peso prices and formats API prices with the peso symbol', () => {
+    const fs = require('node:fs');
+    const html = fs.readFileSync(require.resolve('../rooms.html'), 'utf8');
+    const script = fs.readFileSync(require.resolve('../rooms.js'), 'utf8');
+
+    assert.match(html, /₱8,636/);
+    assert.match(html, /₱15,352/);
+    assert.match(html, /₱31,184/);
+    assert.match(script, /`₱\$\{new Intl\.NumberFormat\('en-PH'\)\.format\(room\.priceKrw\)\}`/);
+    assert.doesNotMatch(script, /₩/);
+  });
+});
+
+describe('room price migration', () => {
+  it('converts legacy prices to PHP and preserves descriptions', async () => {
+    const firestore = new FakeFirestore();
+
+    firestore.seed('room_information', [
+      { id: 'echoing-hall', description: 'Quiet room', priceKrw: 180000 },
+      { id: 'moonview-chamber', description: 'Ocean view', priceKrw: 320000 },
+      { id: 'celestial-suite', description: 'Luxury suite', priceKrw: 650000 }
+    ]);
+
+    await getRoomInformationFromFirestore(firestore);
+
+    assert.deepEqual(
+      firestore.getRecords('room_information').map(({ id, description, priceKrw }) => ({
+        id,
+        description,
+        priceKrw
+      })),
+      [
+        { id: 'echoing-hall', description: 'Quiet room', priceKrw: 8636 },
+        { id: 'moonview-chamber', description: 'Ocean view', priceKrw: 15352 },
+        { id: 'celestial-suite', description: 'Luxury suite', priceKrw: 31184 }
+      ]
+    );
+  });
+
+  it('leaves custom room prices unchanged', async () => {
+    const firestore = new FakeFirestore();
+
+    firestore.seed('room_information', [
+      { id: 'echoing-hall', description: 'Custom room', priceKrw: 245000 }
+    ]);
+
+    await getRoomInformationFromFirestore(firestore);
+
+    const room = firestore.getRecords('room_information')
+      .find(({ id }) => id === 'echoing-hall');
+
+    assert.equal(room.priceKrw, 245000);
+    assert.equal(room.description, 'Custom room');
   });
 });
 

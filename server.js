@@ -125,7 +125,7 @@ function createApp(options = {}) {
     if (!description || description.length > 1000 ||
         typeof payload.priceKrw !== 'number' || !Number.isInteger(payload.priceKrw) ||
         payload.priceKrw < 1 || payload.priceKrw > 10000000) {
-      return res.status(400).json({ error: 'Enter a description of 1–1000 characters and a whole-number price from 1 to 10,000,000 KRW.' });
+      return res.status(400).json({ error: 'Enter a description of 1–1000 characters and a whole-number price from 1 to 10,000,000 PHP.' });
     }
 
     try {

@@ -56,7 +56,7 @@
         const price = card.querySelector('.room-price-amount');
         if (!description || !price) return;
 
-        const formattedPrice = `₩${new Intl.NumberFormat('ko-KR').format(room.priceKrw)}`;
+        const formattedPrice = `₱${new Intl.NumberFormat('en-PH').format(room.priceKrw)}`;
         card.dataset.roomDescription = room.description;
         card.dataset.roomPrice = formattedPrice;
         description.textContent = room.description;

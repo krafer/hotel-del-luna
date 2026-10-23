@@ -10,19 +10,19 @@ const ROOM_INFORMATION_DEFAULTS = [
     key: 'echoing-hall',
     roomName: 'Echoing Hall',
     description: 'A cozy haven where whispers of the past echo softly through the night. Ideal for guests seeking quiet reflection.',
-    priceKrw: 180000
+    priceKrw: 8636
   },
   {
     key: 'moonview-chamber',
     roomName: 'Moonview Chamber',
     description: 'Luxurious quarters with panoramic views of the celestial moon garden and a private hanok-style balcony.',
-    priceKrw: 320000
+    priceKrw: 15352
   },
   {
     key: 'celestial-suite',
     roomName: 'Celestial Suite',
     description: 'The pinnacle of otherworldly luxury, reserved for the most distinguished guests and their unfinished business. With personal attendant',
-    priceKrw: 650000
+    priceKrw: 31184
   }
 ];
 const ROOM_INFORMATION_BY_KEY = new Map(ROOM_INFORMATION_DEFAULTS.map((room) => [room.key, room]));
@@ -471,19 +471,42 @@ async function getRoomInformationFromFirestore(firestore) {
     firestore.collection('room_information').doc(room.key).get()
   ));
   const storedRooms = new Map();
-  snapshots.forEach((snapshot, index) => {
-    if (!snapshot.exists) return;
+
+  const legacyPriceMigrations = {
+    'echoing-hall': { oldPrice: 180000, newPrice: 8636 },
+    'moonview-chamber': { oldPrice: 320000, newPrice: 15352 },
+    'celestial-suite': { oldPrice: 650000, newPrice: 31184 }
+  };
+
+  for (let index = 0; index < snapshots.length; index += 1) {
+    const snapshot = snapshots[index];
+    if (!snapshot.exists) continue;
+
+    const room = ROOM_INFORMATION_DEFAULTS[index];
     const data = snapshot.data();
+
     if (typeof data.description !== 'string' || !data.description.trim() ||
         data.description.length > 1000 || !Number.isInteger(data.priceKrw) ||
         data.priceKrw < 1 || data.priceKrw > 10000000) {
-      throw new Error(`Invalid room information document: ${ROOM_INFORMATION_DEFAULTS[index].key}`);
+      throw new Error(`Invalid room information document: ${room.key}`);
     }
-    storedRooms.set(ROOM_INFORMATION_DEFAULTS[index].key, {
+
+    let priceKrw = data.priceKrw;
+    const migration = legacyPriceMigrations[room.key];
+
+    if (migration && priceKrw === migration.oldPrice) {
+      priceKrw = migration.newPrice;
+      await firestore.collection('room_information').doc(room.key).update({
+        priceKrw
+      });
+    }
+
+    storedRooms.set(room.key, {
       description: data.description,
-      priceKrw: data.priceKrw
+      priceKrw
     });
-  });
+  }
+
   return mergeRoomInformation(storedRooms);
 }
 
