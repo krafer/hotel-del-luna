@@ -792,6 +792,10 @@ section + section { margin-top: 1rem; }
     outline: none;
 }
 
+.form-group input[type="date"]::-webkit-calendar-picker-indicator {
+    filter: brightness(0) invert(1);
+}
+
 .form-group textarea { resize: vertical; min-height: 120px; }
 
 .form-message {

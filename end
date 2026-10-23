@@ -1,0 +1,27 @@
+[1mdiff --git a/db.js b/db.js[m
+[1mindex 1c330ee..fb4b5fe 100644[m
+[1m--- a/db.js[m
+[1m+++ b/db.js[m
+[36m@@ -10,19 +10,19 @@[m [mconst ROOM_INFORMATION_DEFAULTS = [[m
+     key: 'echoing-hall',[m
+     roomName: 'Echoing Hall',[m
+     description: 'A cozy haven where whispers of the past echo softly through the night. Ideal for guests seeking quiet reflection.',[m
+[31m-    priceKrw: 180000[m
+[32m+[m[32m    priceKrw: 8636[m
+   },[m
+   {[m
+     key: 'moonview-chamber',[m
+     roomName: 'Moonview Chamber',[m
+     description: 'Luxurious quarters with panoramic views of the celestial moon garden and a private hanok-style balcony.',[m
+[31m-    priceKrw: 320000[m
+[32m+[m[32m    priceKrw: 15352[m
+   },[m
+   {[m
+     key: 'celestial-suite',[m
+     roomName: 'Celestial Suite',[m
+     description: 'The pinnacle of otherworldly luxury, reserved for the most distinguished guests and their unfinished business. With personal attendant',[m
+[31m-    priceKrw: 650000[m
+[32m+[m[32m    priceKrw: 31184[m
+   }[m
+ ];[m
+ const ROOM_INFORMATION_BY_KEY = new Map(ROOM_INFORMATION_DEFAULTS.map((room) => [room.key, room]));[m
