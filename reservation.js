@@ -1,6 +1,4 @@
 (function () {
-  const GUEST_ID_KEY = 'hoteldelluna_guest_id';
-
   const GUEST_LABELS = {
     '1': '1 Guest',
     '2': '2 Guests',
@@ -11,29 +9,15 @@
   const form = document.getElementById('reservation-form');
   const formMessage = document.getElementById('form-message');
   const submitBtn = document.getElementById('submit-btn');
-  const userIdDisplay = document.getElementById('user-id-display');
-  const storageStatus = document.getElementById('storage-status');
   const reservationsList = document.getElementById('reservations-list');
   const refreshBtn = document.getElementById('refresh-btn');
   const modal = document.getElementById('modal-container');
   const modalTitle = document.getElementById('modal-title');
   const modalContent = document.getElementById('modal-content');
   const modalCloseBtn = document.getElementById('modal-close-btn');
+  const IDEMPOTENCY_STORAGE_KEY = 'hotel_pending_reservation';
 
   let pendingCancelId = null;
-
-  function storageAvailable() {
-    return true;
-  }
-
-  function getGuestId() {
-    let id = localStorage.getItem(GUEST_ID_KEY);
-    if (!id) {
-      id = 'guest-' + Math.random().toString(36).slice(2, 8).toUpperCase();
-      localStorage.setItem(GUEST_ID_KEY, id);
-    }
-    return id;
-  }
 
   function formatDateInput(date) {
     const year = date.getFullYear();
@@ -110,22 +94,35 @@
   }
 
   async function getReservations() {
-    try {
-      const response = await fetch(`/api/reservations?guestId=${encodeURIComponent(getGuestId())}`);
-      if (!response.ok) throw new Error('Failed to load reservations');
-      return await response.json();
-    } catch (e) {
-      return [];
+    const response = await fetch('/api/reservations');
+    if (!response.ok) {
+      throw new Error(response.status === 401
+        ? 'Reservation history requires a signed-in account. Sign-in is not available on this page yet.'
+        : 'Unable to load reservations right now.');
     }
+    return response.json();
   }
 
-  async function saveReservations(list) {
-    if (!list || !list.length) return;
-    return fetch('/api/reservations', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(list[list.length - 1])
-    });
+  function getIdempotencyKey(reservation) {
+    const reservationJson = JSON.stringify(reservation);
+    const pending = sessionStorage.getItem(IDEMPOTENCY_STORAGE_KEY);
+    if (pending) {
+      const saved = JSON.parse(pending);
+      if (saved.reservationJson === reservationJson && typeof saved.key === 'string') {
+        return saved.key;
+      }
+    }
+
+    const key = window.crypto.randomUUID();
+    sessionStorage.setItem(IDEMPOTENCY_STORAGE_KEY, JSON.stringify({ key, reservationJson }));
+    return key;
+  }
+
+  function clearIdempotencyKey(key) {
+    const pending = sessionStorage.getItem(IDEMPOTENCY_STORAGE_KEY);
+    if (pending && JSON.parse(pending).key === key) {
+      sessionStorage.removeItem(IDEMPOTENCY_STORAGE_KEY);
+    }
   }
 
   function formatDate(dateStr) {
@@ -138,12 +135,6 @@
       day: 'numeric',
       year: 'numeric'
     });
-  }
-
-  function escapeHtml(str) {
-    const div = document.createElement('div');
-    div.textContent = str;
-    return div.innerHTML;
   }
 
   function showMessage(text, isError) {
@@ -165,17 +156,24 @@
   }
 
   async function renderReservations() {
-    const guestId = getGuestId();
-    const mine = await getReservations();
-
-    reservationsList.innerHTML = '';
+    let mine;
+    reservationsList.replaceChildren();
+    try {
+      mine = await getReservations();
+    } catch (error) {
+      const unavailable = document.createElement('p');
+      unavailable.className = 'empty-state';
+      unavailable.textContent = error.message;
+      reservationsList.appendChild(unavailable);
+      return false;
+    }
 
     if (!mine.length) {
       const empty = document.createElement('p');
       empty.className = 'empty-state';
       empty.textContent = 'No reservations yet, the house is waiting.';
       reservationsList.appendChild(empty);
-      return;
+      return true;
     }
 
     mine
@@ -184,16 +182,29 @@
       .forEach((r) => {
         const card = document.createElement('div');
         card.className = 'reservation-card';
-        card.innerHTML =
-          '<div style="display:flex; justify-content:space-between; align-items:flex-start; gap:1rem; flex-wrap:wrap;">' +
-            '<div>' +
-              '<p style="font-family: var(--font-display); font-size: 1.1rem; color: var(--text-primary);">' + escapeHtml(r.name) + '</p>' +
-              '<p style="color: var(--text-muted); font-size: 0.85rem; margin-top: 0.3rem;">' +
-                formatDate(r.checkInDate) + ' to ' + formatDate(r.checkOutDate) + ' &middot; ' + escapeHtml(r.roomName) + ' &middot; ' + (GUEST_LABELS[r.guests] || r.guests) +
-              '</p>' +
-            '</div>' +
-            '<button class="btn-cancel" data-id="' + r.id + '">Cancel</button>' +
-          '</div>';
+        const layout = document.createElement('div');
+        layout.style.cssText = 'display:flex; justify-content:space-between; align-items:flex-start; gap:1rem; flex-wrap:wrap;';
+
+        const details = document.createElement('div');
+        const name = document.createElement('p');
+        name.style.cssText = 'font-family: var(--font-display); font-size: 1.1rem; color: var(--text-primary);';
+        name.textContent = String(r.name);
+
+        const dates = document.createElement('p');
+        dates.style.cssText = 'color: var(--text-muted); font-size: 0.85rem; margin-top: 0.3rem;';
+        dates.textContent = `${formatDate(r.checkInDate)} to ${formatDate(r.checkOutDate)} \u00b7 ${String(r.roomName)} \u00b7 ${GUEST_LABELS[r.guests] || String(r.guests)}`;
+
+        const cancelButton = document.createElement('button');
+        cancelButton.type = 'button';
+        cancelButton.className = 'btn-cancel';
+        cancelButton.dataset.id = String(r.id);
+        cancelButton.textContent = 'Cancel';
+
+        details.appendChild(name);
+        details.appendChild(dates);
+        layout.appendChild(details);
+        layout.appendChild(cancelButton);
+        card.appendChild(layout);
         reservationsList.appendChild(card);
       });
 
@@ -207,19 +218,10 @@
         );
       });
     });
+    return true;
   }
 
   function init() {
-    if (userIdDisplay) {
-      userIdDisplay.textContent = 'Your Reservation ID: ' + getGuestId();
-    }
-
-    if (storageStatus) {
-      storageStatus.textContent = storageAvailable()
-        ? 'Your guest ID is stored in this browser so your reservations can be retrieved.'
-        : 'Local storage is unavailable in this browser, so reservations will not be saved after you close this tab.';
-    }
-
     bindDateConstraints();
     selectRoomFromUrl();
     renderReservations();
@@ -261,7 +263,6 @@
 
         try {
           const reservation = {
-            guestId: getGuestId(),
             name: name,
             email: email,
             checkInDate: checkInDate,
@@ -270,14 +271,21 @@
             guests: guests,
           };
 
+          const idempotencyKey = getIdempotencyKey(reservation);
           const response = await fetch('/api/reservations', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: {
+              'Content-Type': 'application/json',
+              'Idempotency-Key': idempotencyKey
+            },
             body: JSON.stringify(reservation)
           });
 
           let serverMessage = 'Reservation save failed';
           if (!response.ok) {
+            if (response.status < 500) {
+              clearIdempotencyKey(idempotencyKey);
+            }
             try {
               const payload = await response.json();
               if (payload && payload.error) {
@@ -296,6 +304,7 @@
             throw new Error(serverMessage);
           }
 
+          clearIdempotencyKey(idempotencyKey);
           await renderReservations();
           showMessage('Reservation confirmed, see you then.', false);
           form.reset();
@@ -318,9 +327,10 @@
     }
 
     if (refreshBtn) {
-      refreshBtn.addEventListener('click', () => {
-        renderReservations();
-        showMessage('Reservation list refreshed.', false);
+      refreshBtn.addEventListener('click', async () => {
+        if (await renderReservations()) {
+          showMessage('Reservation list refreshed.', false);
+        }
       });
     }
 
@@ -334,6 +344,10 @@
           if (response.ok) {
             await renderReservations();
             showMessage('Reservation cancelled.', false);
+          } else {
+            showMessage(response.status === 401 || response.status === 403
+              ? 'Sign in to cancel this reservation.'
+              : 'Unable to cancel this reservation right now.', true);
           }
         }
         closeModal();
