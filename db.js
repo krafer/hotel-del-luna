@@ -96,17 +96,17 @@ function initializeFirebase() {
   }
 
   try {
-    if (!admin.apps || admin.apps.length === 0) {
+    if (admin.getApps().length === 0) {
       admin.initializeApp({
         credential: admin.cert(serviceAccount)
       });
     }
   } catch (error) {
-    console.warn('Firebase credentials are invalid or incomplete. Falling back to local development mode.');
+    console.error('Firebase initialization failed:', error.code || error.message);
     return false;
   }
 
-  firestoreDb = getFirestore();
+  firestoreDb = getFirestore(admin.getApp());
   return true;
 }
 

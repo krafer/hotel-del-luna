@@ -3,6 +3,7 @@ const fs = require('fs');
 const path = require('path');
 const { randomUUID } = require('crypto');
 const admin = require('firebase-admin');
+const { getAuth } = require('firebase-admin/auth');
 const database = require('./db');
 const { createAuthentication, requireAdmin } = require('./auth');
 
@@ -54,12 +55,12 @@ function createApp(options = {}) {
     appId: process.env.FIREBASE_WEB_APP_ID
   }));
   const verifyIdToken = options.verifyIdToken || ((token) => {
-    if (!admin.apps || admin.apps.length === 0) {
+    if (admin.getApps().length === 0) {
       const error = new Error('Firebase Authentication is not initialized.');
       error.code = 'AUTH_UNAVAILABLE';
       throw error;
     }
-    return admin.auth().verifyIdToken(token);
+    return getAuth(admin.getApp()).verifyIdToken(token);
   });
   const authentication = createAuthentication(verifyIdToken);
   const app = express();
