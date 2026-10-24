@@ -1,7 +1,7 @@
 const assert = require('node:assert/strict');
 const { createHash, randomUUID } = require('node:crypto');
 const { afterEach, beforeEach, describe, it } = require('node:test');
-const { createApp } = require('../server');
+const { createApp } = require('../server/server');
 const {
   createAtomicReservation,
   createReservationAtomically,
@@ -10,7 +10,7 @@ const {
   getRoomInformationFromFirestore,
   updateRoomInformationInFirestore,
   updateReservationDetailsInFirestore
-} = require('../db');
+} = require('../server/db');
 
 class FakeFirestore {
   constructor() {
@@ -736,11 +736,14 @@ describe('authentication configuration', () => {
     await new Promise((resolve) => server.once('listening', resolve));
     try {
       const baseUrl = `http://127.0.0.1:${server.address().port}`;
-      const [login, dashboard, adminScript, reservationsPage] = await Promise.all([
+      const [login, dashboard, adminScript, reservationsPage, styles, navigationScript, roomImage] = await Promise.all([
         fetch(`${baseUrl}/admin/login`),
         fetch(`${baseUrl}/admin`),
-        fetch(`${baseUrl}/admin.mjs`),
-        fetch(`${baseUrl}/reservations`)
+        fetch(`${baseUrl}/js/admin.mjs`),
+        fetch(`${baseUrl}/reservations`),
+        fetch(`${baseUrl}/css/hdlstyle.css`),
+        fetch(`${baseUrl}/js/nav.js`),
+        fetch(`${baseUrl}/images/The_Echoing_Hall.png`)
       ]);
       const loginHtml = await login.text();
       const dashboardHtml = await dashboard.text();
@@ -748,6 +751,11 @@ describe('authentication configuration', () => {
       const reservationsHtml = await reservationsPage.text();
       assert.equal(login.status, 200);
       assert.equal(dashboard.status, 200);
+      assert.equal(adminScript.status, 200);
+      assert.equal(reservationsPage.status, 200);
+      assert.equal(styles.status, 200);
+      assert.equal(navigationScript.status, 200);
+      assert.equal(roomImage.status, 200);
       assert.equal(loginHtml.includes('admin-login-form'), true);
       assert.equal(dashboardHtml.includes('admin-reservations'), true);
       assert.equal(dashboardHtml.includes('<th>Total price</th>'), true);
@@ -1022,8 +1030,8 @@ describe('durable booking requirement', () => {
 describe('public room pricing display', () => {
   it('shows the requested peso prices and formats API prices with the peso symbol', () => {
     const fs = require('node:fs');
-    const html = fs.readFileSync(require.resolve('../rooms.html'), 'utf8');
-    const script = fs.readFileSync(require.resolve('../rooms.js'), 'utf8');
+    const html = fs.readFileSync(require.resolve('../public/rooms.html'), 'utf8');
+    const script = fs.readFileSync(require.resolve('../public/js/rooms.js'), 'utf8');
 
     assert.match(html, /₱8,636/);
     assert.match(html, /₱15,352/);
@@ -1126,7 +1134,7 @@ describe('reservation list rendering', () => {
     };
     const injectedText = '<img src=x onerror=alert(1)>';
     const injectedId = '"><script>alert(1)</script>';
-    const source = require('node:fs').readFileSync(require.resolve('../reservation.js'), 'utf8');
+    const source = require('node:fs').readFileSync(require.resolve('../public/js/reservation.js'), 'utf8');
     const vm = require('node:vm');
 
     vm.runInNewContext(source, {
@@ -1154,8 +1162,8 @@ describe('reservation list rendering', () => {
     describe('admin contact message rendering', () => {
       it('provides local search across sender, email, and message using safe text rendering', () => {
         const fs = require('node:fs');
-        const html = fs.readFileSync(require.resolve('../admin.html'), 'utf8');
-        const script = fs.readFileSync(require.resolve('../admin.mjs'), 'utf8');
+        const html = fs.readFileSync(require.resolve('../public/admin.html'), 'utf8');
+        const script = fs.readFileSync(require.resolve('../public/js/admin.mjs'), 'utf8');
 
         assert.match(html, /id="contact-message-search"/);
         assert.match(html, /id="admin-contact-messages"/);
@@ -1173,8 +1181,8 @@ describe('reservation list rendering', () => {
     describe('admin reservation editing UI', () => {
       it('exposes only editable guest fields and sends updates to the protected API', () => {
         const fs = require('node:fs');
-        const html = fs.readFileSync(require.resolve('../admin.html'), 'utf8');
-        const script = fs.readFileSync(require.resolve('../admin.mjs'), 'utf8');
+        const html = fs.readFileSync(require.resolve('../public/admin.html'), 'utf8');
+        const script = fs.readFileSync(require.resolve('../public/js/admin.mjs'), 'utf8');
 
         assert.match(html, /id="edit-reservation-name"[^>]*name="name"/);
         assert.match(html, /id="edit-reservation-email"[^>]*name="email"/);

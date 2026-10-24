@@ -5,10 +5,27 @@ A simple hotel reservation website using a static frontend, a Node.js/Express ba
 ## Architecture
 
 ```text
-Browser frontend -> Node.js/Express API -> Firebase Admin SDK -> Firestore
+Browser frontend (public/) -> Node.js/Express API (server/) -> Firebase Admin SDK -> Firestore
 ```
 
 The browser never connects directly to Firestore. Firestore client rules remain locked down with `allow read, write: if false;`.
+
+## Project layout
+
+```text
+public/
+  css/       Shared website styles
+  images/    Website images
+  js/        Browser scripts
+  *.html     Public pages and admin pages
+server/
+  server.js  Express application and API routes
+  db.js      Firestore persistence
+  auth.js    Request authentication and admin authorization
+test/        API and booking tests
+```
+
+The Express app serves `public/` at the site root, preserving the existing page and asset URLs. Start the app with `npm start` or `npm run dev`; both use `server/server.js`.
 
 ## Requirements
 

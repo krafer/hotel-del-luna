@@ -382,21 +382,21 @@ section + section { margin-top: 1rem; }
 
 .standard-room, .room-echoing {
     background-image: linear-gradient(135deg, rgba(42, 38, 80, 0.45), rgba(25, 21, 52, 0.55)),
-        url('The_Echoing_Hall.png');
+        url('/images/The_Echoing_Hall.png');
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
 }
 .deluxe-room, .room-moonview {
     background-image: linear-gradient(135deg, rgba(36, 31, 74, 0.45), rgba(20, 17, 44, 0.6)),
-        url('The_Moonview_Chamber.jpg');
+        url('/images/The_Moonview_Chamber.jpg');
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
 }
 .suite-room, .room-celestial {
     background-image: linear-gradient(135deg, rgba(45, 31, 61, 0.35), rgba(21, 15, 40, 0.55)),
-        url('Celestial_Suite.png');
+        url('/images/Celestial_Suite.png');
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;

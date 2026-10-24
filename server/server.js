@@ -8,6 +8,7 @@ const database = require('./db');
 const { createAuthentication, requireAdmin } = require('./auth');
 
 const PORT = process.env.PORT || 3000;
+const PUBLIC_DIR = path.join(__dirname, '..', 'public');
 const ROOM_CATEGORIES = database.ROOM_CATEGORIES;
 const IDEMPOTENCY_KEY_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
@@ -68,34 +69,34 @@ function createApp(options = {}) {
   app.use(express.json());
   app.use(express.urlencoded({ extended: true }));
 
-  app.use(express.static(__dirname));
+  app.use(express.static(PUBLIC_DIR));
 
   app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'index.html'));
+    res.sendFile(path.join(PUBLIC_DIR, 'index.html'));
   });
 
   app.get('/rooms', (req, res) => {
-    res.sendFile(path.join(__dirname, 'rooms.html'));
+    res.sendFile(path.join(PUBLIC_DIR, 'rooms.html'));
   });
 
   app.get('/reservations', (req, res) => {
-    res.sendFile(path.join(__dirname, 'reservations.html'));
+    res.sendFile(path.join(PUBLIC_DIR, 'reservations.html'));
   });
 
   app.get('/about', (req, res) => {
-    res.sendFile(path.join(__dirname, 'about.html'));
+    res.sendFile(path.join(PUBLIC_DIR, 'about.html'));
   });
 
   app.get('/contact', (req, res) => {
-    res.sendFile(path.join(__dirname, 'contact.html'));
+    res.sendFile(path.join(PUBLIC_DIR, 'contact.html'));
   });
 
   app.get('/admin/login', (req, res) => {
-    res.sendFile(path.join(__dirname, 'admin-login.html'));
+    res.sendFile(path.join(PUBLIC_DIR, 'admin-login.html'));
   });
 
   app.get('/admin', (req, res) => {
-    res.sendFile(path.join(__dirname, 'admin.html'));
+    res.sendFile(path.join(PUBLIC_DIR, 'admin.html'));
   });
 
   app.get('/api/health', (req, res) => {
@@ -373,7 +374,7 @@ function createApp(options = {}) {
       return res.status(404).json({ error: 'API route not found.' });
     }
 
-    res.sendFile(path.join(__dirname, 'index.html'));
+    res.sendFile(path.join(PUBLIC_DIR, 'index.html'));
   });
 
   return app;
