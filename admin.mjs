@@ -72,12 +72,12 @@ async function fetchAdminData(user) {
     return;
   }
   if (!reservationResponse.ok) {
-    setTableMessage('admin-reservations', 7, 'Reservations could not be loaded.');
+    setTableMessage('admin-reservations', 8, 'Reservations could not be loaded.');
     throw new Error('Reservations could not be loaded. Please try again later.');
   }
   reservations = await reservationResponse.json();
   if (!Array.isArray(reservations)) {
-    setTableMessage('admin-reservations', 7, 'Reservations could not be loaded.');
+    setTableMessage('admin-reservations', 8, 'Reservations could not be loaded.');
     throw new Error('Reservations could not be loaded. Please try again later.');
   }
   renderReservations();
@@ -135,6 +135,12 @@ function formatCreatedAt(value) {
   return Number.isNaN(date.getTime()) ? 'Unavailable' : date.toLocaleString();
 }
 
+function formatTotalPrice(value) {
+  return Number.isSafeInteger(value) && value >= 0
+    ? `₱${new Intl.NumberFormat('en-PH').format(value)}`
+    : 'Unavailable';
+}
+
 function reservationMatchesFilters(reservation) {
   const search = document.getElementById('reservation-search').value.trim().toLocaleLowerCase();
   const room = document.getElementById('reservation-room-filter').value;
@@ -153,7 +159,7 @@ function renderReservations() {
   if (!filtered.length) {
     const row = document.createElement('tr');
     const cell = document.createElement('td');
-    cell.colSpan = 7;
+    cell.colSpan = 8;
     cell.textContent = reservations.length ? 'No reservations match these filters.' : 'No reservations found.';
     row.appendChild(cell);
     body.appendChild(row);
@@ -166,6 +172,7 @@ function renderReservations() {
     addCell(row, reservation.checkInDate);
     addCell(row, reservation.checkOutDate);
     addCell(row, reservation.guests);
+    addCell(row, formatTotalPrice(reservation.totalPrice));
     addCell(row, formatCreatedAt(reservation.createdAt));
     const actionCell = document.createElement('td');
     const detailsButton = document.createElement('button');

@@ -298,6 +298,29 @@ describe('API security boundaries', () => {
     assert.deepEqual((await response.json()).map((reservation) => reservation.id), ['reservation-a']);
   });
 
+  it('returns booking prices to administrators but not reservation owners', async () => {
+    const existingReservation = database.data.reservations.find((reservation) => reservation.id === 'reservation-a');
+    database.firestore.seed('reservations', [{
+      ...existingReservation,
+      nightlyRate: 2000,
+      totalPrice: 6000
+    }]);
+
+    const guestResponse = await fetch(`${baseUrl}/api/reservations`, {
+      headers: { Authorization: 'Bearer guest-a-token' }
+    });
+    const adminResponse = await fetch(`${baseUrl}/api/reservations`, {
+      headers: { Authorization: 'Bearer admin-token' }
+    });
+    const guestReservation = (await guestResponse.json())[0];
+    const adminReservation = (await adminResponse.json()).find((reservation) => reservation.id === 'reservation-a');
+
+    assert.equal(guestReservation.totalPrice, undefined);
+    assert.equal(guestReservation.nightlyRate, undefined);
+    assert.equal(adminReservation.totalPrice, 6000);
+    assert.equal(adminReservation.nightlyRate, 2000);
+  });
+
   it('allows an administrator to update only editable reservation details', async () => {
     database.firestore.seed('reservation_idempotency', [
       { id: 'existing-key', fingerprint: 'unchanged', reservationId: 'reservation-a' }
@@ -713,16 +736,24 @@ describe('authentication configuration', () => {
     await new Promise((resolve) => server.once('listening', resolve));
     try {
       const baseUrl = `http://127.0.0.1:${server.address().port}`;
-      const [login, dashboard] = await Promise.all([
+      const [login, dashboard, adminScript, reservationsPage] = await Promise.all([
         fetch(`${baseUrl}/admin/login`),
-        fetch(`${baseUrl}/admin`)
+        fetch(`${baseUrl}/admin`),
+        fetch(`${baseUrl}/admin.mjs`),
+        fetch(`${baseUrl}/reservations`)
       ]);
       const loginHtml = await login.text();
       const dashboardHtml = await dashboard.text();
+      const adminScriptText = await adminScript.text();
+      const reservationsHtml = await reservationsPage.text();
       assert.equal(login.status, 200);
       assert.equal(dashboard.status, 200);
       assert.equal(loginHtml.includes('admin-login-form'), true);
       assert.equal(dashboardHtml.includes('admin-reservations'), true);
+      assert.equal(dashboardHtml.includes('<th>Total price</th>'), true);
+      assert.match(adminScriptText, /addCell\(row, formatTotalPrice\(reservation\.totalPrice\)\)/);
+      assert.equal(reservationsHtml.includes('Total price'), false);
+      assert.equal(reservationsHtml.includes('totalPrice'), false);
       assert.equal(dashboardHtml.includes('guest@example.com'), false);
     } finally {
       await new Promise((resolve, reject) => {
@@ -782,6 +813,48 @@ describe('atomic booking API', () => {
   it('rejects unknown room categories', async () => {
     const response = await postBooking(baseUrl, bookingPayload({ roomName: 'Royal Tower' }));
     assert.equal(response.status, 400);
+  });
+
+  it('persists server-calculated totals using the current nightly rate and stay duration', async () => {
+    const firstPayload = bookingPayload({
+      checkInDate: futureDate(30),
+      checkOutDate: futureDate(33),
+      totalPrice: 1,
+      nightlyRate: 1
+    });
+    const firstResponse = await postBooking(baseUrl, firstPayload);
+    const firstCreated = await firstResponse.json();
+    const firstStored = database.data.reservations.find((reservation) => reservation.id === firstCreated.id);
+
+    await database.updateRoomInformation('echoing-hall', {
+      description: 'Updated room description',
+      priceKrw: 2000
+    });
+    const secondPayload = bookingPayload({
+      checkInDate: futureDate(40),
+      checkOutDate: futureDate(42)
+    });
+    const secondResponse = await postBooking(baseUrl, secondPayload);
+    const secondCreated = await secondResponse.json();
+    const secondStored = database.data.reservations.find((reservation) => reservation.id === secondCreated.id);
+
+    assert.equal(firstResponse.status, 201);
+    assert.equal(firstCreated.totalPrice, undefined);
+    assert.equal(firstCreated.nightlyRate, undefined);
+    assert.equal(firstStored.nightlyRate, 8636);
+    assert.equal(firstStored.totalPrice, 8636 * 3);
+    assert.equal(secondResponse.status, 201);
+    assert.equal(secondStored.nightlyRate, 2000);
+    assert.equal(secondStored.totalPrice, 4000);
+  });
+
+  it('fails closed when the stored nightly rate is invalid', async () => {
+    database.firestore.seed('room_information', [
+      { id: 'echoing-hall', description: 'Invalid rate', priceKrw: -1 }
+    ]);
+    const response = await postBooking(baseUrl, bookingPayload());
+    assert.equal(response.status, 503);
+    assert.equal(database.data.reservations.length, 3);
   });
 
   it('rejects overlapping stays but allows checkout-day turnover', async () => {

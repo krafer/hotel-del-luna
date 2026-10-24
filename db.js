@@ -128,6 +128,8 @@ function reservationRecord(reservation) {
     checkOutDate: reservation.checkOutDate,
     roomName: reservation.roomName,
     guests: reservation.guests,
+    nightlyRate: reservation.nightlyRate,
+    totalPrice: reservation.totalPrice,
     createdAt: FieldValue.serverTimestamp()
   };
 }
@@ -203,7 +205,15 @@ function validateExistingReservation(existing) {
 }
 
 async function createAtomicReservation(firestore, reservation, idempotencyKey) {
+  if (!isDateOnly(reservation.checkInDate) || !isDateOnly(reservation.checkOutDate) ||
+      reservation.checkOutDate <= reservation.checkInDate) {
+    throw bookingError('INVALID_RESERVATION_DATES');
+  }
+
   const nights = getOccupiedNights(reservation.checkInDate, reservation.checkOutDate);
+  if (nights.length < 1) {
+    throw bookingError('INVALID_RESERVATION_DATES');
+  }
   const idempotencyId = createHash('sha256')
     .update(`${reservation.ownerUid || 'anonymous'}:${idempotencyKey}`)
     .digest('hex');
@@ -218,6 +228,11 @@ async function createAtomicReservation(firestore, reservation, idempotencyKey) {
     return firestore.collection('room_night_claims').doc(claimId);
   });
   const allReservationsQuery = firestore.collection('reservations');
+  const roomInformation = ROOM_INFORMATION_DEFAULTS.find((room) => room.roomName === reservation.roomName);
+  if (!roomInformation) {
+    throw bookingError('BOOKING_STORAGE_UNAVAILABLE');
+  }
+  const roomInformationReference = firestore.collection('room_information').doc(roomInformation.key);
 
   let committedReservationId = null;
   let replayed = false;
@@ -244,6 +259,18 @@ async function createAtomicReservation(firestore, reservation, idempotencyKey) {
         return;
       }
 
+      const roomInformationSnapshot = await transaction.get(roomInformationReference);
+      const nightlyRate = roomInformationSnapshot.exists
+        ? roomInformationSnapshot.get('priceKrw')
+        : roomInformation.priceKrw;
+      if (!Number.isSafeInteger(nightlyRate) || nightlyRate < 1 || nightlyRate > 10000000) {
+        throw bookingError('BOOKING_STORAGE_UNAVAILABLE');
+      }
+      const totalPrice = nightlyRate * nights.length;
+      if (!Number.isSafeInteger(totalPrice)) {
+        throw bookingError('BOOKING_STORAGE_UNAVAILABLE');
+      }
+
       if (claimSnapshots.some((snapshot) => snapshot.exists)) {
         throw bookingError('ROOM_UNAVAILABLE');
       }
@@ -263,7 +290,7 @@ async function createAtomicReservation(firestore, reservation, idempotencyKey) {
         }
       }
 
-      const record = { ...reservationRecord(reservation) };
+      const record = { ...reservationRecord({ ...reservation, nightlyRate, totalPrice }) };
       transaction.create(reservationReference, record);
       transaction.create(idempotencyReference, {
         fingerprint,

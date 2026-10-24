@@ -159,10 +159,11 @@ function createApp(options = {}) {
 
   app.get('/api/reservations', authentication.required, async (req, res) => {
     try {
-      const rows = req.auth.admin === true
+      const isAdmin = req.auth.admin === true;
+      const rows = isAdmin
         ? await db.getAllReservations()
         : await db.getReservationsByOwnerUid(req.auth.uid);
-      res.json(rows);
+      res.json(isAdmin ? rows : rows.map(withoutReservationPricing));
     } catch (error) {
       console.error('Failed to fetch reservations:', error);
       res.status(500).json({ error: 'Failed to fetch reservations' });
@@ -226,7 +227,7 @@ function createApp(options = {}) {
           });
         }
       }
-      res.status(result.replayed ? 200 : 201).json(result.reservation);
+      res.status(result.replayed ? 200 : 201).json(withoutReservationPricing(result.reservation));
     } catch (error) {
       if (error.code === 'ROOM_UNAVAILABLE') {
         return res.status(409).json({ error: 'That room is already reserved for one or more selected nights.' });
@@ -236,6 +237,9 @@ function createApp(options = {}) {
       }
       if (error.code === 'LEGACY_RESERVATION_UNSAFE') {
         return res.status(409).json({ error: 'Room availability cannot be confirmed for this category. Please contact the hotel.' });
+      }
+      if (error.code === 'INVALID_RESERVATION_DATES') {
+        return res.status(400).json({ error: 'Reservation dates must include at least one valid night.' });
       }
       logBookingFailure(error);
       return res.status(503).json({ error: 'Booking could not be secured right now. Please retry with the same Idempotency-Key.' });
@@ -381,6 +385,11 @@ function isDateOnly(value) {
   }
   const parsed = new Date(`${value}T00:00:00.000Z`);
   return !Number.isNaN(parsed.getTime()) && parsed.toISOString().slice(0, 10) === value;
+}
+
+function withoutReservationPricing(reservation) {
+  const { nightlyRate, totalPrice, ...publicReservation } = reservation;
+  return publicReservation;
 }
 
 function getReservationDateRange() {
