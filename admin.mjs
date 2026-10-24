@@ -195,6 +195,7 @@ function showReservationDetails(reservation) {
   document.getElementById('detail-check-in').textContent = reservation.checkInDate || '';
   document.getElementById('detail-check-out').textContent = reservation.checkOutDate || '';
   document.getElementById('detail-guests').textContent = reservation.guests == null ? '' : String(reservation.guests);
+  document.getElementById('detail-total-price').textContent = formatTotalPrice(reservation.totalPrice);
   document.getElementById('detail-created').textContent = formatCreatedAt(reservation.createdAt);
   document.getElementById('detail-status').textContent = reservation.status || 'Confirmed';
   document.getElementById('reservation-details').hidden = false;
